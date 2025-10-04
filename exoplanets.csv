@@ -1,0 +1,49 @@
+import pandas as pd
+import numpy as np
+import datetime
+import random
+
+codename_list = [
+    "Orion", "Andromeda", "Pulsar", "Quasar", "Nebula",
+    "Supernova", "Pegasus", "Cygnus", "Draco", "Lyra"
+]
+
+# --- Final API Call: Fetches all columns needed for the winning outline ---
+api_url = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name,hostname,discoverymethod,disc_year,pl_orbper,pl_rade,pl_masse,sy_dist,st_spectype,disc_facility+from+ps"
+
+try:
+    print("\n--- [ STEP 1: FETCHING FINAL DATASET ] ---")
+    print("Connecting to NASA Exoplanet Archive...")
+    exoplanet_df = pd.read_csv(api_url)
+    print("Data fetch complete.")
+
+    print("\n--- [ STEP 2: PROCESSING DATA ] ---")
+    print(f"Initial row count: {len(exoplanet_df)}")
+    exoplanet_df.dropna(subset=['pl_name', 'discoverymethod', 'disc_year', 'pl_rade', 'pl_orbper'], inplace=True)
+    exoplanet_df.drop_duplicates(subset='pl_name', keep='first', inplace=True)
+    print(f"Removed duplicates and nulls. Unique planet count: {len(exoplanet_df)}")
+
+    print("\n--- [ STEP 3: ENRICHING DATA ] ---")
+    conditions = (exoplanet_df['pl_rade'] >= 0.8) & (exoplanet_df['pl_rade'] <= 1.9) & (exoplanet_df['pl_orbper'] >= 200) & (exoplanet_df['pl_orbper'] <= 500)
+    exoplanet_df['is_habitable'] = np.where(conditions, 'Potentially Habitable', 'Not Habitable')
+    habitable_count = exoplanet_df[exoplanet_df['is_habitable'] == 'Potentially Habitable'].shape[0]
+    print(f"Added 'is_habitable' column. Found {habitable_count} potentially habitable planets.")
+
+    print("\n--- [ STEP 4: FINALIZING FILE ] ---")
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    version = f"v{timestamp}"
+    codename = random.choice(codename_list)
+    file_name = f"planetrics_{version}_{codename}_finalbuild.csv"
+    
+    exoplanet_df.to_csv(file_name, index=False)
+    print("Final CSV file has been created.")
+
+    print("\n-------------------------------------------")
+    print(f"✅ SUCCESS! File created:")
+    print(f"   --> {file_name}")
+    print(f"   Contains {len(exoplanet_df)} unique confirmed planets.")
+    print(f"   Data sourced from: https://exoplanetarchive.ipac.caltech.edu")
+    print("-------------------------------------------\n")
+
+except Exception as e:
+    print(f"An error occurred: {e}")
