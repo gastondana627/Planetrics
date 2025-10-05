@@ -23,6 +23,11 @@ For a complete user guide, a glossary of astronomical terms, and the full projec
 
 **(https://docs.google.com/document/d/1sEHqjwEYnXbBOz1wqOtrtdt7RFG7ity9emL5928juWQ/edit?tab=t.0)**
 
+
+
+Data:
+https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PS
+
 ---
 
 ## Running the Code
